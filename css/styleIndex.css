@@ -1,0 +1,38 @@
+/*left side styling*/
+.redClass {
+    border:solid;
+    border-color:darkred;
+    margin-bottom:1px;
+}
+
+.greenClass {
+    border:solid;
+    border-color:green;
+    margin-bottom:1px;
+}
+
+.cirMenu {
+    border: 2px solid MidnightBlue;
+    border-radius: 5px;
+    margin:2px;
+}
+
+.innerMenu {
+    height:500px;
+    overflow-y:scroll;
+}
+
+.majorSearch {
+    width: 300px;
+    border: 2px solid MidnightBlue;
+    margin:25px 0px 0px 2px;
+}
+
+.gurList {
+    border:solid black 2px;
+    margin:5px 0px 0px 2px;
+}
+/*left side styling end*/
+
+/*right side styling*/
+/*right side styling end*/
