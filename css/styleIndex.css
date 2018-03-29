@@ -35,4 +35,20 @@
 /*left side styling end*/
 
 /*right side styling*/
+.flex-container {
+  display: flex;
+  flex-direction: row;
+   flex-flow: row wrap;
+}
+
+.semBox {
+    width: 30%;
+    height: 300px;
+    border: 1px solid blue;
+    direction: row;
+}
+
+
+
+
 /*right side styling end*/
