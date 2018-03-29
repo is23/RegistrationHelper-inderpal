@@ -46,59 +46,24 @@
                 </div>
 
                 <div class="menu cirMenu">
-                    <ul class="menu-list innerMenu">
-                        <li class="gurList">
-                            <a class="is-active">Mathematics Gur</a>
-                            <ul>
-                                <li class="greenClass">
-                                    <a id="dra1" draggable="true" ondragstart="drag(event)">Calculus 1</a>
-                                </li>
-                                <li class="redClass">
-                                    <a id="dra1" draggable="true" ondragstart="drag(event)">Calculus 2</a>
-                                </li>
-                                <li class="redClass">
-                                    <a id="dra1" draggable="true" ondragstart="drag(event)">Probability and Statistics</a>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <li class="gurList">
-                            <a class="is-active">Physics GUR</a>
-                            <ul>
-                                <li class="greenClass">
-                                    <a id="dra1" draggable="true" ondragstart="drag(event)">Physics 1</a>
-                                </li>
-                                <li class="greenClass">
-                                    <a id="dra1" draggable="true" ondragstart="drag(event)">Physics 1 Lab</a>
-                                </li>
-                                <li class="redClass">
-                                    <a id="dra1" draggable="true" ondragstart="drag(event)">Physics 2</a>
-                                </li>
-                                <li class="redClass">
-                                    <a id="dra1" draggable="true" ondragstart="drag(event)">Physics 2 Lab</a>
-
-                                </li>
-                            </ul>
-                        </li>
-
-                        <li class="gurList">
-                            <a class="is-active">Physics GUR</a>
-                            <ul>
-                                <li class="greenClass">
-                                    <a id="dra1" draggable="true" ondragstart="drag(event)">Physics 1</a>
-                                </li>
-                                <li class="greenClass">
-                                    <a id="dra1" draggable="true" ondragstart="drag(event)">Physics 1 Lab</a>
-                                </li>
-                                <li class="redClass">
-                                    <a id="dra1" draggable="true" ondragstart="drag(event)">Physics 2</a>
-                                </li>
-                                <li class="redClass">
-                                    <a id="dra1" draggable="true" ondragstart="drag(event)">Physics 2 Lab</a>
-                                </li>
-                            </ul>
-                        </li>
-
+                    <ul class="menu-list innerMenu" id = "demo1">
+                        <script>
+                        myObj=[{name:"CS",classes:["CS 100", "CS113"]},{name:"DS",classes:["DS 100", "DS113"]}];
+                        txt="";
+                        for (x in myObj) {
+                            txt += "<li class=\"gurList\">" +
+                                "<a class=\"is-active\">" + myObj[x].name + "</a>" +
+                                "<ul>";
+                                for(i in myObj[x].classes){
+                                    txt += "<li class=\"greenClass\">" +
+                                            "<a>" + myObj[x].classes[i] + "</a>" +
+                                        "</li>";
+                                }
+                                txt+="</ul>" +
+                            "</li>";
+                        }
+                        document.getElementById("demo1").innerHTML = txt;
+                        </script>
                     </ul>
                 </div>
             </div>
@@ -107,9 +72,51 @@
                 <div>
                     <h1><strong>Plan Your Semesters</strong></h1>
                 </div>
-                <div class="box">
-
+                <div>
+                    <button type="button" onclick="createSemster()">Add Semster</button>
                 </div>
+                <div class="box">
+                    <div id="demo2" class="flex-container">
+                        <div class="semBox">
+                            <form action="/action_page.php">
+                                <fieldset>
+                                    First name:
+                                    <input type="text" name="firstname" value="Mickey">
+                                    <br>
+                                    Last name:<br>
+                                    <input type="text" name="lastname" value="Mouse">
+                                    <br><br>
+                                    <input type="submit" value="Submit">
+                                    <button type="button" onclick="loadSemsters()">Submit</button>
+                                </fieldset>
+                            </form>
+                            <div class="control">
+                                Semster Name: <input class="input" type="text" placeholder="Enter Name">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    function createSemster() {
+                        //make it first equal the already innerhtml and then add new and after click submit button enable add button
+                        document.getElementById("demo2").innerHTML +=
+                                                                        "<div class=\"semBox\">" +
+                                                                        "</div>";
+                    }
+
+                    function addClass() {
+                        document.getElementById("demo2").innerHTML
+                    }
+
+                    function loadSemesters() {
+                        // initally load semsters
+                    }
+
+                    function sumbmitSemester() {
+                        // sumbit the new semster created, hide the form and execute the loadSemster  function again.
+                    }
+                </script>
+                <!--while loop to keep doing the the button click-->
             </div>
         </div>
 
