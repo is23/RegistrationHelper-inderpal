@@ -3,17 +3,18 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="js/runScript.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
         <link rel="stylesheet" href="css/styleIndex.css">
     </head>
 
-    <body>
+    <body onload="loadClasses(); loadSemesters();">
 
         <!--Titile--------------------------------------------------------------->
         <section class="section" style="background:royalblue;">
             <div class="container">
-                <h1 class="title" style="color:white;">Student Planner</h1>
+                <h1 class="title" style="color:white;">Registration Helper</h1>
                 <h2 class="subtitle" style="color:white">
                 &nbsp; A plan to smooth progression.
                 </h2>
@@ -25,11 +26,11 @@
             <div class="column is-two-fifths" >
                 <div class="box majorSearch">
                     <div>
-                        <h1><strong>Search you major</strong></h1>
+                        <h1><strong>Search your major</strong></h1>
                     </div>
                     <div class="field has-addons">
                         <div class="control">
-                            <input list="majors" type="text" name="majorSearch">
+                            <input list="majors" type="text" name="majorSearch" placeholder="Computer Science">
                                 <datalist id="majors">
                                     <option value="Computer Science">
                                     <option value="Information Technology">
@@ -46,24 +47,130 @@
                 </div>
 
                 <div class="menu cirMenu">
-                    <ul class="menu-list innerMenu" id = "demo1">
+                    <ul class="menu-list innerMenu" id="classesMenu">
                         <script>
-                        myObj=[{name:"CS",classes:["CS 100", "CS113"]},{name:"DS",classes:["DS 100", "DS113"]}];
-                        txt="";
-                        for (x in myObj) {
-                            txt += "<li class=\"gurList\">" +
-                                "<a class=\"is-active\">" + myObj[x].name + "</a>" +
-                                "<ul>";
-                                for(i in myObj[x].classes){
-                                    txt += "<li class=\"greenClass\">" +
-                                            "<a>" + myObj[x].classes[i] + "</a>" +
-                                        "</li>";
-                                }
-                                txt+="</ul>" +
-                            "</li>";
-                        }
-                        document.getElementById("demo1").innerHTML = txt;
+                            function loadClasses() {
+                                var xmlhttp = new XMLHttpRequest();
+                               //[{group:gur name, classes:[{class:Cs 100, detail:[description]},{class:Cs 113, detail:[description],pre:[],available:0-1-2}]}]
+                                xmlhttp.onreadystatechange = function() {
+                                    if (this.readyState == 4 && this.status == 200) {
+                                        var result = JSON.parse(this.responseText);
+                                        //extract only groups
+                                        var tempGroupArr =[];
+                                        var final=[];
+                                        var refined={};
+                                        var classes = [];
+                                        var inDict = {};
+                                        var classDetail = [];
+                                        var prer = [];
+                                        var check = false;
+                                        var index;
+                                        for (x in result) {
+                                            if(!(tempGroupArr.includes(result[x].group))) {
+                                                tempGroupArr.push(result[x].group);
+                                                final.push({"group":result[x].group});
+                                            }
+                                        }
+                                        txt="";
+
+                                        for (x in final) {
+                                            final[x]["classes"]=[];
+                                            for(i in result) {
+                                                if(final[x]["group"] == result[i]["group"]){
+                                                    classDetail = [];
+
+                                                    inDict = {};
+                                                    inDict = {"class":"","detail":classDetail};
+                                                    index = result[i].order-1;
+                                                    inDict["class"]=result[i].class;
+                                                    inDict["code"] = result[i].code;
+                                                    if(result[i].prereqs.length == 0) {
+                                                        check = true;
+                                                    }
+                                                    else {
+                                                        for(y in result[i].prereqs){
+
+                                                           prer.push(result[i].prereqs[y].prereq);
+                                                           if(result[i].prereqs[y].logic == 'OR' && result[i].prereqs[y].code != null){
+                                                               check = true;
+                                                           }
+                                                           else if (result[i].prereqs[y].logic == 'OR' && result[i].prereqs[y].code == null){
+                                                               check = false;
+                                                           }
+                                                           else if (result[i].prereqs[y].logic == 'AND' && result[i].prereqs[y].code != null){
+                                                               check = true;
+                                                           }
+                                                           else if (result[i].prereqs[y].logic == 'AND' && result[i].prereqs[y].code == null){
+                                                               check = false;
+                                                           }
+                                                          // if(result[i].prereqs[y].logic == null && result[i].prereqs[y].code != null) {
+                                                            //   check = true;
+                                                           //}
+                                                           //else {
+                                                             //  check = false;
+                                                           //}
+                                                        }
+                                                    }
+                                                    if(check == true) {
+                                                        inDict["available"] = 0;
+                                                    }
+                                                    else {
+                                                        inDict["available"] = 1;
+                                                    }
+                                                    //this make the prereq array and then empty it for next class
+                                                    if(prer.length == 0){
+                                                        prer.push("No Prereq");
+                                                    }
+                                                    inDict["pre"]=prer;
+                                                    prer=[];
+
+                                                    classDetail.push(result[i].description);
+                                                    inDict["detail"]=classDetail;
+                                                    final[x]["classes"].push(inDict);
+
+                                                }
+
+
+                                            }
+                                        }
+                                        for(x in final) {
+                                            txt += "<li class=\"gurList\">" +
+                                                    "<a class=\"is-active\">" + final[x].group + "</a>" +
+                                                    "<ul>";
+                                                    for(i in final[x].classes) {
+                                                        if(final[x].classes[i].code != null){
+                                                            txt+= "<li class=\"blueClass h\" >" +
+                                                                    "<a>" + final[x].classes[i].class + " (" + final[x].classes[i].detail +")" +
+                                                                    "<span class=\"hoverText\">"+ final[x].classes[i].pre+"</span>" + "</a>"+
+                                                                "</li>";
+                                                        }
+                                                        else {
+                                                            if(final[x].classes[i].available == 0){
+                                                                txt+= "<li class=\"greenClass h\" >" +
+                                                                    "<a>" + final[x].classes[i].class + " (" + final[x].classes[i].detail +")" +
+                                                                    "<span class=\"hoverText\">"+ final[x].classes[i].pre+"</span>" + "</a>"+
+                                                                "</li>";
+                                                            }
+                                                            else {
+                                                                txt+= "<li class=\"redClass h\" >" +
+                                                                    "<a>" + final[x].classes[i].class + " (" + final[x].classes[i].detail +")" +
+                                                                    "<span class=\"hoverText\">"+ final[x].classes[i].pre+"</span>" + "</a>"+
+                                                                "</li>";
+                                                            }
+                                                        }
+                                                    }
+                                                    txt+= "</ul>" +
+                                                "</li>";
+                                        }
+                                        document.getElementById("classesMenu").innerHTML = txt;
+                                    }
+                                };
+                                xmlhttp.open("GET", "../getAllClassesStudent.php", true);
+                                xmlhttp.send();
+                            }
+
                         </script>
+
                     </ul>
                 </div>
             </div>
@@ -72,48 +179,190 @@
                 <div>
                     <h1><strong>Plan Your Semesters</strong></h1>
                 </div>
-                <div>
-                    <button type="button" onclick="createSemster()">Add Semster</button>
-                </div>
+
                 <div class="box">
-                    <div id="demo2" class="flex-container">
-                        <div class="semBox">
-                            <form action="/action_page.php">
-                                <fieldset>
-                                    First name:
-                                    <input type="text" name="firstname" value="Mickey">
-                                    <br>
-                                    Last name:<br>
-                                    <input type="text" name="lastname" value="Mouse">
-                                    <br><br>
-                                    <input type="submit" value="Submit">
-                                    <button type="button" onclick="loadSemsters()">Submit</button>
-                                </fieldset>
-                            </form>
-                            <div class="control">
-                                Semster Name: <input class="input" type="text" placeholder="Enter Name">
+                    <div>
+                        <button type="button" onclick="createSemester()">Add Semester</button>
+                    </div>
+                    <div id="createSem" class="semBox-dynamic">
+                            Semester Name:
+                            <input class="style-component-add-Sem" type="text" id="semesterName"><br>
+                            <label class="radio style-component-add-Sem">
+                                <input type="radio" name="sem" class="sem">
+                                    SPRING
+                            </label>
+                            <label class="radio style-component-add-Sem">
+                                <input type="radio" name="sem" class="sem">
+                                    FALL
+                            </label><br>
+                            Year: <input class="style-component-add-Sem" type="number" min="2000" max="3000" id="year"><br>
+                            <button class="style-component-add-Sem" type="button" onclick="addClass()">Add Class</button>
+                            <div id="addClasses" class="box add-class-field">
                             </div>
-                        </div>
+                        <button type="button" onclick="sumbmitSemester()" >Submit</button>
+                        <!--onclick="sumbmitSemester()-->
                     </div>
                 </div>
+
+
+                <div class="box">
+                    <div id="fillSemester" onload="loadSemesters()" class="flex-container">
+
+                    </div>
+                </div>
+
                 <script>
-                    function createSemster() {
+                    function createSemester() {
                         //make it first equal the already innerhtml and then add new and after click submit button enable add button
-                        document.getElementById("demo2").innerHTML +=
-                                                                        "<div class=\"semBox\">" +
-                                                                        "</div>";
+                        var x = document.getElementById("createSem");
+                        x.style.display = "block";
+                        document.getElementById("addClasses").innerHTML = "";
+                        document.getElementById("year").innerHTML = "";
+                        document.getElementsByClassName('sem')[0].checked = false;
+                        document.getElementsByClassName('sem')[1].checked = false;
+                        document.getElementById('semesterName').value = '';
                     }
 
                     function addClass() {
-                        document.getElementById("demo2").innerHTML
+                        var addClass = document.createElement("addClass");
+                        addClass.innerHTML = "<input type=\"text\" class=\"eachClass\" name=\"semester name\">";
+                        document.getElementById("addClasses").appendChild(addClass);
                     }
 
                     function loadSemesters() {
-                        // initally load semsters
+                        var xmlhttp = new XMLHttpRequest();
+                        xmlhttp.onreadystatechange = function() {
+                            if (this.readyState == 4 && this.status == 200) {
+                                var result = JSON.parse(this.responseText);
+                                var final = [];
+                                var semester = {};
+                                var cls = [];
+                                var tempCodeLst = [];
+                                var txt = "";
+                                for(x in result) {
+                                    if(result[x].code != null) {
+                                        if(final.length > 0) {
+                                            for(j in final)
+                                            {
+                                                if(result[x].code == final[j].code) {
+                                                    //semester["code"] = result[x].code;
+                                                    final[j].classes.push(result[x].class);
+                                                }
+                                                else {
+                                                    semester["code"] = result[x].code;
+                                                    cls.push(result[x].class);
+                                                    semester["classes"] = cls;
+                                                    cls = [];
+                                                    final.push(semester);
+                                                    semester={};
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            semester["code"] = result[x].code;
+                                            cls.push(result[x].class);
+                                            semester["classes"] = cls
+                                            final.push(semester);
+                                            cls = [];
+                                            semester={};
+                                        }
+                                    }
+                                }
+                                //final.sort(function(a, b){return a.code[2] - b.year[2]});
+                                var z = 0;
+                                for(i in final){
+
+                                  //txt = "";
+                                  txt += "<div class=\"semBox-display\">"+
+
+                                            "<p class=\"semesterName\">Semester Name: "+ final[i].code[0];
+                                            if(final[i].code[1] == "F"){
+                                                txt+="&nbsp  &nbsp &nbsp Fall</p>";
+                                            }
+                                            else {
+                                                txt+="&nbsp  &nbsp &nbsp Spring</p>";
+                                            }
+                                            txt+="<p> YEAR </p>"+
+                                            "<div class=\"box display-class-field\">";
+
+                                            for(k in final[i].classes){
+                                                z=k;
+                                                z++;
+                                                txt+="<p> Class "+z+": "+final[i].classes[k] +"</p>";
+                                            }
+                                            txt+="</div>"+
+
+                                            //in JS hAVE A FOR LOOP TO make class1: Cs100 class 2 class3-->
+                                            "<button type=\"button\" onclick=\"editSemester()\">EDIT</button>"+
+                                            //edit will add all the values in the semester to creatre a nw semester boxand delet the semester and sumbit the semester will repopulate it-->
+                                        "</div>  ";
+
+                                }
+                                document.getElementById("fillSemester").innerHTML = txt;
+                            }
+                        };
+                        xmlhttp.open("GET", "../getAllClassesStudent.php", true);
+                        xmlhttp.send();
                     }
 
+                    //function sumbmitSemester() {
+                        // sumbit the new semester created, hide the form and execute the loadSemester  function again.
+
+                        //$(document).ready(function(){
+
+
+
+                            /*var c = document.getElementById("v");
+                            $(c).click(function(){
+                                $.post("../updateStudentRecords.php",
+                                  final,function(){
+                                      loadSemesters();
+                                  }
+                                );
+                            });
+                        });*/
+
+                    //}
+
                     function sumbmitSemester() {
-                        // sumbit the new semster created, hide the form and execute the loadSemster  function again.
+
+                      var x = document.getElementById("createSem");
+                        x.style.display = "none";
+                        var semesterName = document.getElementById("semesterName").value;
+                        var classes = [];
+                        var arr = document.getElementsByClassName('eachClass');
+                        for(i=0 ; i < arr.length ; i++) {
+                            classes.push(arr[i].value);
+                        }
+                        var code ="";
+                        code+=semesterName;
+                        if( document.getElementsByClassName('sem')[0].checked == true) {
+                            code+="S1";
+                        }
+                        else {
+                            code+="F1";
+                        }
+                        var final=[];
+                        var di ={}
+                        for(j in classes) {
+                            di["name"]=classes[j];
+                            di["ucid"]="mgt23";
+                            di["code"]=code;
+                            di["major"]="Science1";
+                            final.push(di);
+                            di={};
+                        }
+
+                        var f={"x":final};
+                        var finals = JSON.stringify(f);
+
+                      $.post('../updateStudentRecords.php',f,(data, textStatus, jqXHR) => {console.log(data); loadSemesters(); loadClasses();},"text");
+                    }
+
+                    function editSemter() {
+                        var x = document.getElementById("createSem");
+                        x.style.display = "block";
+
                     }
                 </script>
                 <!--while loop to keep doing the the button click-->
