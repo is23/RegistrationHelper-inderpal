@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="css/styleIndex.css">
     </head>
 
-    <body onload="loadClasses(); loadSemesters();">
+    <body onload="setUser();">
 
         <!--Titile--------------------------------------------------------------->
         <section class="section" style="background:royalblue;">
@@ -18,6 +18,13 @@
                 <h2 class="subtitle" style="color:white">
                 &nbsp; A plan to smooth progression.
                 </h2>
+                <p id="e">hello</p>
+                <script>
+                    //get username
+                    var querys = window.location.search.substring(1);
+                    var n = querys.split("=").pop();
+                    document.getElementById("e").innerHTML = n;
+                </script>
             </div>
         </section>
 
@@ -42,6 +49,13 @@
                         </div>
                     </div>
                 </div>
+                <div class="box">
+                    <div>
+                        <p style="display:inline; color:blue;font-weight:bold">Blue: </p><p style="display:inline;">Class already taken</p><br>
+                        <p style="display:inline; color:green;font-weight:bold">Green: </p><p style="display:inline;">Class eligible for upcoming semester</p><br>
+                        <p style="display:inline; color:darkred;font-weight:bold">Red: </p><p style="display:inline;">Class ineligible for upcoming semester. Missing prerequisites</p>
+                    </div>
+                </div>
                 <div style="margin:25px 0px 0px 2px;">
                     <h1><strong>Curriculum</strong></h1>
                 </div>
@@ -49,13 +63,24 @@
                 <div class="menu cirMenu">
                     <ul class="menu-list innerMenu" id="classesMenu">
                         <script>
-                            function loadClasses() {
-                                var xmlhttp = new XMLHttpRequest();
+                            function setUser() {
+                                var querys = window.location.search.substring(1);
+                                var n = querys.split("=").pop();
+                                var di ={};
+                                di["ucid"] = n;
+                                di["major"] = "Science1";
+                                var req = {"x": di};
+                                $.post('../getAllClassesStudent.php',req,(data, textStatus, jqXHR) => {console.log(data);loadClasses(data); loadSemesters(data);},"text");
+                            }
+                            function loadClasses(data) {
+
+                                //var xmlhttp = new XMLHttpRequest();
                                //[{group:gur name, classes:[{class:Cs 100, detail:[description]},{class:Cs 113, detail:[description],pre:[],available:0-1-2}]}]
-                                xmlhttp.onreadystatechange = function() {
-                                    if (this.readyState == 4 && this.status == 200) {
-                                        var result = JSON.parse(this.responseText);
+                                //xmlhttp.onreadystatechange = function() {
+                                    //if (this.readyState == 4 && this.status == 200) {
+                                        //var result = JSON.parse(this.responseText);
                                         //extract only groups
+                                        var result = JSON.parse(data);
                                         var tempGroupArr =[];
                                         var final=[];
                                         var refined={};
@@ -93,6 +118,7 @@
                                                            prer.push(result[i].prereqs[y].prereq);
                                                            if(result[i].prereqs[y].logic == 'OR' && result[i].prereqs[y].code != null){
                                                                check = true;
+                                                               break;
                                                            }
                                                            else if (result[i].prereqs[y].logic == 'OR' && result[i].prereqs[y].code == null){
                                                                check = false;
@@ -163,10 +189,10 @@
                                                 "</li>";
                                         }
                                         document.getElementById("classesMenu").innerHTML = txt;
-                                    }
-                                };
-                                xmlhttp.open("GET", "../getAllClassesStudent.php", true);
-                                xmlhttp.send();
+                                    //}
+                                //};
+                                //xmlhttp.open("GET", "../getAllClassesStudent.php", true);
+                                //xmlhttp.send();
                             }
 
                         </script>
@@ -185,17 +211,17 @@
                         <button type="button" onclick="createSemester()">Add Semester</button>
                     </div>
                     <div id="createSem" class="semBox-dynamic">
-                            Semester Name:
-                            <input class="style-component-add-Sem" type="text" id="semesterName"><br>
+                            <!--Semester Name:
+                            <input class="style-component-add-Sem" type="text" id="semesterName"><br>-->
                             <label class="radio style-component-add-Sem">
-                                <input type="radio" name="sem" class="sem">
+                                <input type="radio" name="sem" class="sem" required>
                                     SPRING
                             </label>
                             <label class="radio style-component-add-Sem">
-                                <input type="radio" name="sem" class="sem">
+                                <input type="radio" name="sem" class="sem" required>
                                     FALL
                             </label><br>
-                            Year: <input class="style-component-add-Sem" type="number" min="2000" max="3000" id="year"><br>
+                            Year: <input class="style-component-add-Sem" type="number" min="2000" max="3000" id="year" required><br>
                             <button class="style-component-add-Sem" type="button" onclick="addClass()">Add Class</button>
                             <div id="addClasses" class="box add-class-field">
                             </div>
@@ -220,25 +246,47 @@
                         document.getElementById("year").innerHTML = "";
                         document.getElementsByClassName('sem')[0].checked = false;
                         document.getElementsByClassName('sem')[1].checked = false;
-                        document.getElementById('semesterName').value = '';
+                        //document.getElementById('semesterName').value = '';
                     }
 
                     function addClass() {
-                        var addClass = document.createElement("addClass");
-                        addClass.innerHTML = "<input type=\"text\" class=\"eachClass\" name=\"semester name\">";
-                        document.getElementById("addClasses").appendChild(addClass);
+                        var querys = window.location.search.substring(1);
+                        var n = querys.split("=").pop();
+                        var di ={};
+                        di["ucid"] = n;
+                        di["major"] = "Science1";
+                        var req = {"x": di};
+                        $.post('../getAllClassesStudent.php',req,(data, textStatus, jqXHR) => {
+                            var result = JSON.parse(data);
+                            var clsArr = [];
+                            for(i in result) {
+                                clsArr.push(result[i].class);
+                            }
+                            var txt = "";
+                            var addClass = document.createElement("addClass");
+                            txt += "<input type=\"text\" list=\"cl\" class=\"eachClass\" name=\"semester name\">"+
+                            "<datalist id=\"cl\">";
+                            for(x in clsArr) {
+                                txt+="<option value=\""+clsArr[x]+"\" >";
+                            }
+                            txt+="</datalist>";
+                            addClass.innerHTML = txt;
+                            document.getElementById("addClasses").appendChild(addClass);
+                        },"text");
+
                     }
 
-                    function loadSemesters() {
-                        var xmlhttp = new XMLHttpRequest();
-                        xmlhttp.onreadystatechange = function() {
-                            if (this.readyState == 4 && this.status == 200) {
-                                var result = JSON.parse(this.responseText);
+                    function loadSemesters(data) {
+                        //var xmlhttp = new XMLHttpRequest();
+                        //xmlhttp.onreadystatechange = function() {
+                            //if (this.readyState == 4 && this.status == 200) {
+                                var result = JSON.parse(data);
                                 var final = [];
                                 var semester = {};
                                 var cls = [];
                                 var tempCodeLst = [];
                                 var txt = "";
+                                var check = false;
                                 for(x in result) {
                                     if(result[x].code != null) {
                                         if(final.length > 0) {
@@ -247,15 +295,21 @@
                                                 if(result[x].code == final[j].code) {
                                                     //semester["code"] = result[x].code;
                                                     final[j].classes.push(result[x].class);
+                                                    check = false;
+                                                    break;
                                                 }
-                                                else {
+                                                else{
+                                                    check = true;
+                                                }
+                                            }
+                                            if(check == true) {
                                                     semester["code"] = result[x].code;
                                                     cls.push(result[x].class);
                                                     semester["classes"] = cls;
                                                     cls = [];
                                                     final.push(semester);
                                                     semester={};
-                                                }
+                                                    check = false;
                                             }
                                         }
                                         else {
@@ -270,39 +324,84 @@
                                 }
                                 //final.sort(function(a, b){return a.code[2] - b.year[2]});
                                 var z = 0;
+                                final.sort(sortYear);
                                 for(i in final){
 
                                   //txt = "";
+                                  if(i == (final.length - 1)) { // last then add edit button
+                                      txt += "<div class=\"semBox-display\">"+
+
+                                                "<p class=\"semesterName\">Year: "+ final[i].code[0]+
+                                                final[i].code[1]+final[i].code[2]+final[i].code[3];
+                                                if(final[i].code[4] == "F"){
+                                                    txt+="&nbsp  &nbsp &nbsp Fall</p>";
+                                                }
+                                                else {
+                                                    txt+="&nbsp  &nbsp &nbsp Spring</p>";
+                                                }
+                                                txt+="<div class=\"box display-class-field\">";
+
+                                                for(k in final[i].classes){
+                                                    z=k;
+                                                    z++;
+                                                    txt+="<p> Class "+z+": "+"</p>";
+                                                    txt+="<input type=\"text\" id=\"last"+z+"\" value=\"" + final[i].classes[k]+"\"" + "disabled>";
+
+                                                }
+                                                txt+="</div>"+
+
+                                                //in JS hAVE A FOR LOOP TO make class1: Cs100 class 2 class3-->
+                                                "<button type=\"button\" onclick=\"editSemester()\">EDIT</button>"+
+                                                //edit will add all the values in the semester to creatre a nw semester boxand delet the semester and sumbit the semester will repopulate it-->
+                                            "</div>  ";
+                                  }
+                                  else {
                                   txt += "<div class=\"semBox-display\">"+
 
-                                            "<p class=\"semesterName\">Semester Name: "+ final[i].code[0];
-                                            if(final[i].code[1] == "F"){
+                                            "<p class=\"semesterName\">Year: "+ final[i].code[0]+
+                                            final[i].code[1]+final[i].code[2]+final[i].code[3];
+                                            if(final[i].code[4] == "F"){
                                                 txt+="&nbsp  &nbsp &nbsp Fall</p>";
                                             }
                                             else {
                                                 txt+="&nbsp  &nbsp &nbsp Spring</p>";
                                             }
-                                            txt+="<p> YEAR </p>"+
-                                            "<div class=\"box display-class-field\">";
+                                            txt+="<div class=\"box display-class-field\">";
 
                                             for(k in final[i].classes){
                                                 z=k;
                                                 z++;
-                                                txt+="<p> Class "+z+": "+final[i].classes[k] +"</p>";
+                                                txt+="<p> Class "+z+": "/*+final[i].classes[k] */+"</p>";
+                                                txt+="<input type=\"text\" value=\"" + final[i].classes[k]+"\"" + " disabled>";
+
                                             }
                                             txt+="</div>"+
 
                                             //in JS hAVE A FOR LOOP TO make class1: Cs100 class 2 class3-->
-                                            "<button type=\"button\" onclick=\"editSemester()\">EDIT</button>"+
+
                                             //edit will add all the values in the semester to creatre a nw semester boxand delet the semester and sumbit the semester will repopulate it-->
                                         "</div>  ";
+                                    }
 
                                 }
                                 document.getElementById("fillSemester").innerHTML = txt;
-                            }
-                        };
-                        xmlhttp.open("GET", "../getAllClassesStudent.php", true);
-                        xmlhttp.send();
+                            //}
+                        //};
+                        //xmlhttp.open("GET", "../getAllClassesStudent.php", true);
+                        //xmlhttp.send();
+                    }
+
+                    function sortYear(a, b) { // for sorting semesters
+                        const yeara = a.code;
+                        const yearb = b.code;
+
+                        let c = 0;
+                        if (yeara > yearb) {
+                        c = 1;
+                        } else if (yeara < yearb) {
+                        c = -1;
+                        }
+                        return c;
                     }
 
                     //function sumbmitSemester() {
@@ -328,7 +427,7 @@
 
                       var x = document.getElementById("createSem");
                         x.style.display = "none";
-                        var semesterName = document.getElementById("semesterName").value;
+                        var semesterName = document.getElementById("year").value;
                         var classes = [];
                         var arr = document.getElementsByClassName('eachClass');
                         for(i=0 ; i < arr.length ; i++) {
@@ -337,16 +436,19 @@
                         var code ="";
                         code+=semesterName;
                         if( document.getElementsByClassName('sem')[0].checked == true) {
-                            code+="S1";
+                            code+="S";
                         }
                         else {
-                            code+="F1";
+                            code+="F";
                         }
                         var final=[];
                         var di ={}
+                            //get username
+                            var querys = window.location.search.substring(1);
+                            var n = querys.split("=").pop();
                         for(j in classes) {
                             di["name"]=classes[j];
-                            di["ucid"]="mgt23";
+                            di["ucid"]=n;
                             di["code"]=code;
                             di["major"]="Science1";
                             final.push(di);
@@ -356,12 +458,32 @@
                         var f={"x":final};
                         var finals = JSON.stringify(f);
 
-                      $.post('../updateStudentRecords.php',f,(data, textStatus, jqXHR) => {console.log(data); loadSemesters(); loadClasses();},"text");
+                      $.post('../updateStudentRecords.php',f,(data, textStatus, jqXHR) => {console.log(data); setUser();},"text");
                     }
 
-                    function editSemter() {
-                        var x = document.getElementById("createSem");
-                        x.style.display = "block";
+                    function editSemester() {
+                        var querys = window.location.search.substring(1);
+                        var n = querys.split("=").pop();
+                        let clas = []
+                        let di = {};
+                        //var x = document.getElementById("createSem");
+                        //var y = document.getElementById("last2").value;
+                        var z = 1;
+                        var id = "last"+z;
+                        while(document.getElementById(id) != null) {
+                            di["ucid"] = n;
+                            di["name"] = document.getElementById(id).value;
+                            di["major"] = "Science1";
+                            clas.push(di);
+                            di={};
+                            z++;
+                            id="last"+z;
+                        }
+                        let final = {"x":clas};
+
+                        $.post('../revertStudentRecords.php',final,(data, textStatus, jqXHR) => {setUser();},"text");
+                        //x.style.display = "block";
+                        //x.innerHTML = final["x"]["ucid"];
 
                     }
                 </script>
