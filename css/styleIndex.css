@@ -2,12 +2,21 @@
 .redClass {
     border:solid;
     border-color:darkred;
+    font-size:10px;
     margin-bottom:1px;
 }
 
 .greenClass {
     border:solid;
     border-color:green;
+    font-size:10px;
+    margin-bottom:1px;
+}
+
+.blueClass {
+    border:solid;
+    border-color:royalblue;
+    font-size:10px;
     margin-bottom:1px;
 }
 
@@ -30,6 +39,7 @@
 
 .gurList {
     border:solid black 2px;
+    font-size:10px;
     margin:5px 0px 0px 2px;
 }
 /*left side styling end*/
@@ -38,15 +48,57 @@
 .flex-container {
   display: flex;
   flex-direction: row;
-   flex-flow: row wrap;
+  flex-flow: row wrap;
 }
 
-.semBox {
+.semBox-dynamic {
+  width:30%;
+
+  border: 1px solid blue;
+  direction: row;
+  display:none;
+}
+
+.add-class-field {
+    height:150px;
+    overflow-y:scroll;
+}
+
+.display-class-field {
+    height:65%;
+    width:95%;
+    overflow-y:scroll;
+}
+
+.semBox-display {
     width: 30%;
     height: 300px;
     border: 1px solid blue;
     direction: row;
 }
+
+.style-component-add-Sem {
+    margin-bottom:10px;
+}
+
+.hoverText {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    top: -5px;
+    left: 105%; 
+}
+
+.h:hover .hoverText {
+    visibility: visible;
+}
+
 
 
 
