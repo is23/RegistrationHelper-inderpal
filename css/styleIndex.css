@@ -42,6 +42,30 @@
     font-size:10px;
     margin:5px 0px 0px 2px;
 }
+
+.legend-blue {
+    display:inline;
+    color:blue;
+    font-weight:bold;
+}
+
+.legend-green {
+    display:inline;
+    color:green;
+    font-weight:bold;
+}
+
+.legend-red {
+    display:inline;
+    color:darkred;
+    font-weight:bold;
+}
+
+.legend-inline {
+    display:inline;
+}
+
+
 /*left side styling end*/
 
 /*right side styling*/
@@ -92,7 +116,7 @@
 
     /* Position the tooltip */
     top: -5px;
-    left: 105%; 
+    left: 105%;
 }
 
 .h:hover .hoverText {
