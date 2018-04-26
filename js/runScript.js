@@ -1,14 +1,357 @@
 
-    function allowDrop(ev) {
-        ev.preventDefault();
+function getUserName() {
+    var querys = window.location.search.substring(1);
+    var n = querys.split("=").pop();
+    document.getElementById("e").innerHTML = n;
+}
+
+
+function setUser() { //get classes for user
+    var querys = window.location.search.substring(1);
+    var n = querys.split("=").pop();
+    var di ={};
+    di["ucid"] = n;
+    di["major"] = "Science1";
+    var req = {"x": di};
+    $.post('../getAllClassesStudent.php',req,(data, textStatus, jqXHR) => {console.log(data);loadClasses(data); loadSemesters(data);},"text");
+}
+
+function loadClasses(data) {// load classses with color code
+            var result = JSON.parse(data);
+            var tempGroupArr =[];
+            var final=[];
+            var refined={};
+            var classes = [];
+            var inDict = {};
+            var classDetail = [];
+            var prer = [];
+            var check = false;
+            var index;
+            for (x in result) {
+                if(!(tempGroupArr.includes(result[x].group))) {
+                    tempGroupArr.push(result[x].group);
+                    final.push({"group":result[x].group});
+                }
+            }
+            txt="";
+
+            for (x in final) {
+                final[x]["classes"]=[];
+                for(i in result) {
+                    if(final[x]["group"] == result[i]["group"]){
+                        classDetail = [];
+
+                        inDict = {};
+                        inDict = {"class":"","detail":classDetail};
+                        index = result[i].order-1;
+                        inDict["class"]=result[i].class;
+                        inDict["code"] = result[i].code;
+                        if(result[i].prereqs.length == 0) {
+                            check = true;
+                        }
+                        else {
+                            for(y in result[i].prereqs){
+
+                               prer.push(result[i].prereqs[y].prereq);
+                               if(result[i].prereqs[y].logic == 'OR' && result[i].prereqs[y].code != null){
+                                   check = true;
+                                   break;
+                               }
+                               else if (result[i].prereqs[y].logic == 'OR' && result[i].prereqs[y].code == null){
+                                   check = false;
+                               }
+                               else if (result[i].prereqs[y].logic == 'AND' && result[i].prereqs[y].code != null){
+                                   check = true;
+                               }
+                               else if (result[i].prereqs[y].logic == 'AND' && result[i].prereqs[y].code == null){
+                                   check = false;
+                               }
+                              // if(result[i].prereqs[y].logic == null && result[i].prereqs[y].code != null) {
+                                //   check = true;
+                               //}
+                               //else {
+                                 //  check = false;
+                               //}
+                            }
+                        }
+                        if(check == true) {
+                            inDict["available"] = 0;
+                        }
+                        else {
+                            inDict["available"] = 1;
+                        }
+                        //this make the prereq array and then empty it for next class
+                        if(prer.length == 0){
+                            prer.push("No Prereq");
+                        }
+                        inDict["pre"]=prer;
+                        prer=[];
+
+                        classDetail.push(result[i].description);
+                        inDict["detail"]=classDetail;
+                        final[x]["classes"].push(inDict);
+
+                    }
+
+
+                }
+            }
+            for(x in final) {
+                txt += "<li class=\"gurList\">" +
+                        "<a class=\"is-active\">" + final[x].group + "</a>" +
+                        "<ul>";
+                        for(i in final[x].classes) {
+                            if(final[x].classes[i].code != null){
+                                txt+= "<li class=\"blueClass h\" >" +
+                                        "<a>" + final[x].classes[i].class + " (" + final[x].classes[i].detail +")" +
+                                        "<span class=\"hoverText\">"+ final[x].classes[i].pre+"</span>" + "</a>"+
+                                    "</li>";
+                            }
+                            else {
+                                if(final[x].classes[i].available == 0){
+                                    txt+= "<li class=\"greenClass h\" >" +
+                                        "<a>" + final[x].classes[i].class + " (" + final[x].classes[i].detail +")" +
+                                        "<span class=\"hoverText\">"+ final[x].classes[i].pre+"</span>" + "</a>"+
+                                    "</li>";
+                                }
+                                else {
+                                    txt+= "<li class=\"redClass h\" >" +
+                                        "<a>" + final[x].classes[i].class + " (" + final[x].classes[i].detail +")" +
+                                        "<span class=\"hoverText\">"+ final[x].classes[i].pre+"</span>" + "</a>"+
+                                    "</li>";
+                                }
+                            }
+                        }
+                        txt+= "</ul>" +
+                    "</li>";
+            }
+            document.getElementById("classesMenu").innerHTML = txt;
+}
+
+
+function createSemester() {
+    //make it first equal the already innerhtml and then add new and after click submit button enable add button
+    var x = document.getElementById("createSem");
+    x.style.display = "block";
+    document.getElementById("addClasses").innerHTML = "";
+    document.getElementById("year").innerHTML = "";
+    document.getElementsByClassName('sem')[0].checked = false;
+    document.getElementsByClassName('sem')[1].checked = false;
+    //document.getElementById('semesterName').value = '';
+}
+
+function addClass() {
+    var querys = window.location.search.substring(1);
+    var n = querys.split("=").pop();
+    var di ={};
+    di["ucid"] = n;
+    di["major"] = "Science1";
+    var req = {"x": di};
+    $.post('../getAllClassesStudent.php',req,(data, textStatus, jqXHR) => {
+        var result = JSON.parse(data);
+        var clsArr = [];
+        for(i in result) {
+            clsArr.push(result[i].class);
+        }
+        var txt = "";
+        var addClass = document.createElement("addClass");
+        txt += "<input type=\"text\" list=\"cl\" class=\"eachClass\" name=\"semester name\">"+
+        "<datalist id=\"cl\">";
+        for(x in clsArr) {
+            txt+="<option value=\""+clsArr[x]+"\" >";
+        }
+        txt+="</datalist>";
+        addClass.innerHTML = txt;
+        document.getElementById("addClasses").appendChild(addClass);
+    },"text");
+
+}
+
+function loadSemesters(data) {
+    //var xmlhttp = new XMLHttpRequest();
+    //xmlhttp.onreadystatechange = function() {
+        //if (this.readyState == 4 && this.status == 200) {
+            var result = JSON.parse(data);
+            var final = [];
+            var semester = {};
+            var cls = [];
+            var tempCodeLst = [];
+            var txt = "";
+            var check = false;
+            for(x in result) {
+                if(result[x].code != null) {
+                    if(final.length > 0) {
+                        for(j in final)
+                        {
+                            if(result[x].code == final[j].code) {
+                                //semester["code"] = result[x].code;
+                                final[j].classes.push(result[x].class);
+                                check = false;
+                                break;
+                            }
+                            else{
+                                check = true;
+                            }
+                        }
+                        if(check == true) {
+                                semester["code"] = result[x].code;
+                                cls.push(result[x].class);
+                                semester["classes"] = cls;
+                                cls = [];
+                                final.push(semester);
+                                semester={};
+                                check = false;
+                        }
+                    }
+                    else {
+                        semester["code"] = result[x].code;
+                        cls.push(result[x].class);
+                        semester["classes"] = cls
+                        final.push(semester);
+                        cls = [];
+                        semester={};
+                    }
+                }
+            }
+            //final.sort(function(a, b){return a.code[2] - b.year[2]});
+            var z = 0;
+            final.sort(sortYear);
+            for(i in final){
+
+              //txt = "";
+              if(i == (final.length - 1)) { // last then add edit button
+                  txt += "<div class=\"semBox-display\">"+
+
+                            "<p class=\"semesterName\">Year: "+ final[i].code[0]+
+                            final[i].code[1]+final[i].code[2]+final[i].code[3];
+                            if(final[i].code[4] == "F"){
+                                txt+="&nbsp  &nbsp &nbsp Fall</p>";
+                            }
+                            else {
+                                txt+="&nbsp  &nbsp &nbsp Spring</p>";
+                            }
+                            txt+="<div class=\"box display-class-field\">";
+
+                            for(k in final[i].classes){
+                                z=k;
+                                z++;
+                                txt+="<p> Class "+z+": "+"</p>";
+                                txt+="<input type=\"text\" id=\"last"+z+"\" value=\"" + final[i].classes[k]+"\"" + "disabled>";
+
+                            }
+                            txt+="</div>"+
+
+                            //in JS hAVE A FOR LOOP TO make class1: Cs100 class 2 class3-->
+                            "<button type=\"button\" onclick=\"editSemester()\">EDIT</button>"+
+                            //edit will add all the values in the semester to creatre a nw semester boxand delet the semester and sumbit the semester will repopulate it-->
+                        "</div>  ";
+              }
+              else {
+              txt += "<div class=\"semBox-display\">"+
+
+                        "<p class=\"semesterName\">Year: "+ final[i].code[0]+
+                        final[i].code[1]+final[i].code[2]+final[i].code[3];
+                        if(final[i].code[4] == "F"){
+                            txt+="&nbsp  &nbsp &nbsp Fall</p>";
+                        }
+                        else {
+                            txt+="&nbsp  &nbsp &nbsp Spring</p>";
+                        }
+                        txt+="<div class=\"box display-class-field\">";
+
+                        for(k in final[i].classes){
+                            z=k;
+                            z++;
+                            txt+="<p> Class "+z+": "/*+final[i].classes[k] */+"</p>";
+                            txt+="<input type=\"text\" value=\"" + final[i].classes[k]+"\"" + " disabled>";
+
+                        }
+                        txt+="</div>"+
+
+                        //in JS hAVE A FOR LOOP TO make class1: Cs100 class 2 class3-->
+
+                        //edit will add all the values in the semester to creatre a nw semester boxand delet the semester and sumbit the semester will repopulate it-->
+                    "</div>  ";
+                }
+
+            }
+            document.getElementById("fillSemester").innerHTML = txt;
+}
+
+
+function sortYear(a, b) { // for sorting semesters
+    const yeara = a.code;
+    const yearb = b.code;
+
+    let c = 0;
+    if (yeara > yearb) {
+    c = 1;
+    } else if (yeara < yearb) {
+    c = -1;
+    }
+    return c;
+}
+
+function sumbmitSemester() {
+
+  var x = document.getElementById("createSem");
+    x.style.display = "none";
+    var semesterName = document.getElementById("year").value;
+    var classes = [];
+    var arr = document.getElementsByClassName('eachClass');
+    for(i=0 ; i < arr.length ; i++) {
+        classes.push(arr[i].value);
+    }
+    var code ="";
+    code+=semesterName;
+    if( document.getElementsByClassName('sem')[0].checked == true) {
+        code+="S";
+    }
+    else {
+        code+="F";
+    }
+    var final=[];
+    var di ={}
+        //get username
+        var querys = window.location.search.substring(1);
+        var n = querys.split("=").pop();
+    for(j in classes) {
+        di["name"]=classes[j];
+        di["ucid"]=n;
+        di["code"]=code;
+        di["major"]="Science1";
+        final.push(di);
+        di={};
     }
 
-    function drag(ev) {
-        ev.dataTransfer.setData("text", ev.target.id);
-    }
+    var f={"x":final};
+    var finals = JSON.stringify(f);
 
-    function drop(ev) {
-        ev.preventDefault();
-        var data = ev.dataTransfer.getData("text");
-        ev.target.appendChild(document.getElementById(data));
+  $.post('../updateStudentRecords.php',f,(data, textStatus, jqXHR) => {console.log(data); setUser();},"text");
+}
+
+function editSemester() {
+    var querys = window.location.search.substring(1);
+    var n = querys.split("=").pop();
+    let clas = []
+    let di = {};
+    //var x = document.getElementById("createSem");
+    //var y = document.getElementById("last2").value;
+    var z = 1;
+    var id = "last"+z;
+    while(document.getElementById(id) != null) {
+        di["ucid"] = n;
+        di["name"] = document.getElementById(id).value;
+        di["major"] = "Science1";
+        clas.push(di);
+        di={};
+        z++;
+        id="last"+z;
     }
+    let final = {"x":clas};
+
+    $.post('../revertStudentRecords.php',final,(data, textStatus, jqXHR) => {setUser();},"text");
+    //x.style.display = "block";
+    //x.innerHTML = final["x"]["ucid"];
+
+}
