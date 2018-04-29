@@ -92,12 +92,44 @@ function findClassStatus(data) {
     return final;
 }
 
+function collapse(grpName) {
+    /*var items = document.getElementsByClassName("item-collapse");
+    for (x=0; x<items.length; x++) {
+        //items[x].addEventListener("click", function() {
+            //this.classList.toggle("active");
+
+            //var list = this.nextElementSibling;
+            if (items[x].style.display == "block") {
+                items[x].style.display = "none";
+            }
+            else {
+                items[x].style.display = "block";
+            }
+        //});
+        //try using hide and show like for submit button
+
+    }*/
+    var it = document.getElementsByClassName(grpName);
+    if (it[0].style.display == "block") {
+        it[0].style.display = "none";
+    }
+    else {
+        it[0].style.display = "block";
+    }
+}
+
 function loadClasses(data) {// load classses with color code
-    let final = findClassStatus(data)
+    let final = findClassStatus(data);
+    let fixSpace;
+    let temp = "";
+    console.log("dshdhashda"+final.length);
     for(x in final) {
+        fixSpace = (final[x].group).split(' ').join('_');
+        temp+="\""+fixSpace+"\"";
         txt += "<li class=\"gurList\">" +
-                "<a class=\"is-active\">" + final[x].group + "</a>" +
-                "<ul>";
+                "<button class=\"collapse-button\" onclick=\'collapse("+temp+")\'>" + final[x].group + "</button>" +
+                "<div class=\"item-collapse "+fixSpace+"\"><ul>";
+                temp="";
                 for(i in final[x].classes) {
                     if(final[x].classes[i].code != null){
                         txt+= "<li class=\"blueClass h\" >" +
@@ -120,10 +152,14 @@ function loadClasses(data) {// load classses with color code
                         }
                     }
                 }
-                txt+= "</ul>" +
+                txt+= "</ul><div>" +
             "</li>";
+            if(Math.round(final.length/2 - 1) == x) {
+                document.getElementById("classesMenuLeft").innerHTML = txt;
+                txt="";
+            }
     }
-    document.getElementById("classesMenu").innerHTML = txt;
+    document.getElementById("classesMenuRight").innerHTML = txt;
 }
 
 
@@ -240,7 +276,7 @@ function loadSemesters(data) {
                             txt+="</div>"+
 
                             //in JS hAVE A FOR LOOP TO make class1: Cs100 class 2 class3-->
-                            "<button type=\"button\" onclick=\"editSemester()\">EDIT</button>"+
+                            "<button type=\"button\" onclick=\"deleteSemester()\">Delete Semester</button>"+
                             //edit will add all the values in the semester to creatre a nw semester boxand delet the semester and sumbit the semester will repopulate it-->
                         "</div>  ";
               }
@@ -388,7 +424,7 @@ function sumbmitSemester() {
 
 }
 
-function editSemester() {
+function deleteSemester() {
     var querys = window.location.search.substring(1);
     var n = querys.split("=").pop();
     let clas = []
