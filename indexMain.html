@@ -9,20 +9,18 @@
         <link rel="stylesheet" href="css/styleIndex.css">
     </head>
 
-    <body onload="setUser();">
+    <body onload="setUser(); getUserName();">
 
         <!--Titile--------------------------------------------------------------->
-        <section class="section" style="background:royalblue;">
-            <div class="container">
+        <div class="box" style="background:royalblue; height:10%; width:30%">
+
                 <h1 class="title" style="color:white;">Registration Helper</h1>
                 <h2 class="subtitle" style="color:white">
                     &nbsp; A plan to smooth progression.
                 </h2>
-                <script>
-                    getUserName();
-                </script>
-            </div>
-        </section>
+                <p id="e"></p>
+
+        </div>
 
         <!--Area columns--------------------------------------------------------->
         <div class="columns">
@@ -45,30 +43,29 @@
                         </div>
                     </div>
                 </div>
-                <div class="box">
-                    <div>
-                        <p class="legend-blue">Blue: </p>
-                            <p class="legend-inline">Class already taken</p>
-                        <br>
 
-                        <p class="legend-green">Green: </p>
-                        <p class="legend-inline">
-                            Class eligible for upcoming semester
-                        </p>
-                        <br>
-
-                        <p class="legend-red">Red: </p>
-                        <p class="legend-inline">
-                            Class ineligible for upcoming semester. Missing prerequisites
-                        </p>
-                    </div>
-                </div>
                 <div style="margin:25px 0px 0px 2px;">
                     <h1><strong>Curriculum</strong></h1>
                 </div>
 
                 <div class="menu cirMenu">
-                    <ul class="menu-list innerMenu" id="classesMenu">
+                    <p class="legend-blue">Blue: </p>
+                        <p class="legend-inline">Class already taken</p>
+                    <br>
+
+                    <p class="legend-green">Green: </p>
+                    <p class="legend-inline">
+                        Class eligible for upcoming semester
+                    </p>
+                    <br>
+
+                    <p class="legend-red">Red: </p>
+                    <p class="legend-inline">
+                        Class ineligible for upcoming semester. Missing prerequisites
+                    </p>
+                    <ul class="innerMenuLeft" id="classesMenuLeft">
+                    </ul>
+                    <ul class="innerMenuRight" id="classesMenuRight">
                     </ul>
                 </div>
             </div>
