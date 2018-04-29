@@ -93,22 +93,6 @@ function findClassStatus(data) {
 }
 
 function collapse(grpName) {
-    /*var items = document.getElementsByClassName("item-collapse");
-    for (x=0; x<items.length; x++) {
-        //items[x].addEventListener("click", function() {
-            //this.classList.toggle("active");
-
-            //var list = this.nextElementSibling;
-            if (items[x].style.display == "block") {
-                items[x].style.display = "none";
-            }
-            else {
-                items[x].style.display = "block";
-            }
-        //});
-        //try using hide and show like for submit button
-
-    }*/
     var it = document.getElementsByClassName(grpName);
     if (it[0].style.display == "block") {
         it[0].style.display = "none";
@@ -189,8 +173,9 @@ function addClass() {
         }
         var txt = "";
         var addClass = document.createElement("addClass");
-        txt += "<input type=\"text\" list=\"cl\" class=\"eachClass\" name=\"semester name\">"+
-        "<datalist id=\"cl\">";
+        txt+="<div><input type=\"text\" list=\"cl\"/>";
+        txt+="<a onclick=\"removefield()\" class=\"rm\">X</a></div>";
+        txt+="<datalist id=\"cl\">";
         for(x in clsArr) {
             txt+="<option value=\""+clsArr[x]+"\" >";
         }
@@ -199,6 +184,12 @@ function addClass() {
         document.getElementById("addClasses").appendChild(addClass);
     },"text");
 
+}
+
+function removefield() {
+    $(".add-class-field").on("click",".rm", function() {
+       $(this).parent('div').remove();
+   });
 }
 
 function loadSemesters(data) {
@@ -254,11 +245,13 @@ function loadSemesters(data) {
 
               //txt = "";
               if(i == (final.length - 1)) { // last then add edit button
+                  let tempCode = final[i].code[0]+
+                  final[i].code[1]+final[i].code[2]+final[i].code[3];
+                  let seme = "\'"+final[i].code[4]+"\'";
                   txt += "<div class=\"semBox-display\">"+
 
-                            "<p class=\"semesterName\">Year: "+ final[i].code[0]+
-                            final[i].code[1]+final[i].code[2]+final[i].code[3];
-                            if(final[i].code[4] == "F"){
+                            "<p class=\"semesterName\">Year: "+ tempCode;
+                            if(seme == "F"){
                                 txt+="&nbsp  &nbsp &nbsp Fall</p>";
                             }
                             else {
@@ -277,6 +270,7 @@ function loadSemesters(data) {
 
                             //in JS hAVE A FOR LOOP TO make class1: Cs100 class 2 class3-->
                             "<button type=\"button\" onclick=\"deleteSemester()\">Delete Semester</button>"+
+                            "<button type=\"button\" onclick=\"editSemester("+tempCode+","+seme+")\">Edit Semester</button>"+
                             //edit will add all the values in the semester to creatre a nw semester boxand delet the semester and sumbit the semester will repopulate it-->
                         "</div>  ";
               }
@@ -423,7 +417,18 @@ function sumbmitSemester() {
     },"text");
 
 }
-
+function editSemester(tempCode,seme) {
+    var x = document.getElementById("createSem");
+    x.style.display = "block";
+    document.getElementById("addClasses").innerHTML = "";
+    document.getElementById("year").value = tempCode;
+    if(seme == "F") {
+        document.getElementsByClassName('sem')[1].checked = true;
+    }
+    else {
+        document.getElementsByClassName('sem')[0].checked = true;
+    }
+}
 function deleteSemester() {
     var querys = window.location.search.substring(1);
     var n = querys.split("=").pop();
